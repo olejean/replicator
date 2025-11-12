@@ -35,26 +35,33 @@ docker build -t mysql-ch-replicator:latest .
 # docker push your-registry/mysql-ch-replicator:latest
 ```
 
-2. **Настройте values.yaml:**
+2. **Соберите Docker образ  (если тестируете локально):**
+
+```bash
+
+docker build -t mysql-ch-replicator:latest .
+```
+
+3. **Настройте values.yaml:**
 
 Отредактируйте `helm/replicator/values.yaml`:
 - Укажите правильный host для ClickHouse Service
 - Настройте параметры MySQL
 - Проверьте StorageClass для PVC
 
-3. **Создайте namespace (если еще не создан):**
+4. **Создайте namespace (если еще не создан):**
 
 ```bash
 kubectl create namespace elementary-analytics
 ```
 
-4. **Установите Helm chart:**
+5. **Установите Helm chart:**
 
 ```bash
 helm install replicator ./helm/replicator -n elementary-analytics
 ```
 
-5. **Проверьте статус:**
+6. **Проверьте статус:**
 
 ```bash
 kubectl get pods -n elementary-analytics -l app.kubernetes.io/name=replicator
@@ -63,7 +70,14 @@ kubectl logs -n elementary-analytics -l app.kubernetes.io/name=replicator
 
 ### Вариант 2: Использование Kubernetes манифестов
 
-1. **Соберите Docker образ** (см. выше)
+1. **Соберите Docker образ:**
+
+```bash
+docker build -t mysql-ch-replicator:latest .
+```
+
+docker build -t mysql-ch-replicator:latest .
+```
 
 2. **Создайте namespace (если еще не создан):**
 
