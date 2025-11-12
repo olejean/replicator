@@ -1,0 +1,74 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse-target-mcr
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: element
+      CLICKHOUSE_USER: ch_user
+      CLICKHOUSE_PASSWORD: ch_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse-config/clickhouse-config.xml:/etc/clickhouse-server/config.d/custom-config.xml:ro
+      - ./clickhouse-config/users.xml:/etc/clickhouse-server/users.d/custom-users.xml:ro
+    networks:
+      - replication-net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  replicator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mysql-ch-replicator-mcr
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./binlog_data:/app/data
+    command: ["mysql_ch_replicator", "--config", "/app/config.yaml", "run_all"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    networks:
+      - replication-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "mysql_ch_replicator"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-replication-mcr
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - './local_grafana_storage:/var/lib/grafana'
+    networks:
+      - replication-net
+
+volumes:
+  mysql_data:
+  clickhouse_data:
+
+networks:
+  replication-net:
+    driver: bridge
