@@ -1,0 +1,65 @@
+# Образ репликатора
+image:
+  repository: mysql-ch-replicator
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Настройки репликатора
+replicator:
+  replicas: 1
+  
+  # Ресурсы
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+# Настройки MySQL
+mysql:
+  host: "192.168.0.14"
+  port: 3306
+  user: "root"
+  password: "Roman1290"  # Используйте Secret в production!
+
+# Настройки ClickHouse
+clickhouse:
+  host: "clickhouse"  # Имя Service ClickHouse
+  port: 8123
+  user: "ch_user"
+  password: "ch_password"  # Используйте Secret в production!
+  connection_timeout: 30
+  send_receive_timeout: 300
+
+# Настройки binlog
+binlog:
+  data_dir: "/app/data/"
+  records_per_file: 100000
+  binlog_retention_period: 43200
+
+# Другие настройки
+config:
+  initial_replication_threads: 4
+  log_level: "debug"
+
+# PersistentVolume для данных
+# Репликатор хранит данные binlog для восстановления состояния после перезапуска
+persistence:
+  enabled: true
+  storageClass: "standard"  # Измените на ваш StorageClass
+  size: 10Gi
+  accessMode: ReadWriteOnce
+
+# Настройки healthcheck
+healthcheck:
+  enabled: true
+  initialDelaySeconds: 40
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+# Namespace
+namespace: default
+

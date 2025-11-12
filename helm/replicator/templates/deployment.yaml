@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "replicator.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "replicator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicator.replicas }}
+  selector:
+    matchLabels:
+      {{- include "replicator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "replicator.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: replicator
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["mysql_ch_replicator", "--config", "/app/config.yaml", "run_all"]
+        volumeMounts:
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+          readOnly: true
+        - name: data
+          mountPath: {{ .Values.binlog.data_dir }}
+        resources:
+          {{- toYaml .Values.replicator.resources | nindent 10 }}
+        {{- if .Values.healthcheck.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - mysql_ch_replicator
+          initialDelaySeconds: {{ .Values.healthcheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthcheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthcheck.timeoutSeconds }}
+          failureThreshold: {{ .Values.healthcheck.failureThreshold }}
+        readinessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - mysql_ch_replicator
+          initialDelaySeconds: {{ .Values.healthcheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthcheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthcheck.timeoutSeconds }}
+        {{- end }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "replicator.fullname" . }}-config
+      {{- if .Values.persistence.enabled }}
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ include "replicator.fullname" . }}-data
+      {{- else }}
+      - name: data
+        emptyDir: {}
+      {{- end }}
+

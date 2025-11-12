@@ -1,0 +1,247 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: replicator-config
+  namespace: default
+data:
+  config.yaml: |
+    mysql:
+      host: '192.168.0.14'  # IP адрес MySQL сервера
+      port: 3306
+      user: 'root'
+      password: 'Roman1290'
+
+    clickhouse:
+      host: 'clickhouse'  # Имя Service ClickHouse в Kubernetes
+      port: 8123
+      user: 'ch_user'
+      password: 'ch_password'
+      connection_timeout: 30
+      send_receive_timeout: 300
+
+    binlog_replicator:
+      data_dir: '/app/data/'
+      records_per_file: 100000
+      binlog_retention_period: 43200
+
+    initial_replication_threads: 4    
+
+    log_level: 'debug'    
+
+    databases:
+      element:
+        tables:
+
+          account:
+            date_filter:
+              date_column: "registered_at"
+              start_date: "2023-10-01"
+          
+          account_session:
+            date_filter:
+              date_column: "created_at"
+              start_date: "2023-10-01"
+
+          account_team:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          account_team_marker_team:
+            date_filter: false
+
+          account_teams:
+            date_filter: false
+
+          account_to_team_tags:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          balance:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          balance_transaction:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          commands:
+            date_filter: false
+
+          constructor_filter:
+            date_filter: false
+
+          constructor_filter_data:
+            date_filter: false
+
+          customer_balance:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          customer_balance_movement:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          customer_payment_transaction:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          customer_token_api:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          data_constructor:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          data_constructor_additional:
+            date_filter: false
+
+          form_constructor:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          form_constructor_access_users:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          form_constructor_filter:
+            date_filter: false
+
+          honeypots:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          honeypots_amount_in_task:
+            date_filter: false
+
+          honeypots_failed:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          honeypots_user_log:
+            date_filter:
+              date_column: "created_at"
+              start_date: "2024-06-26"
+
+          marker_team:
+            date_filter: false
+
+          moderation_results:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          noti_channel:
+            date_filter: false
+
+          notification_channel_settings:
+            date_filter: false
+
+          notification_subscription:
+            date_filter:
+              date_column: "created_at"
+              start_date: "2024-06-26"
+
+          notification_g:
+            date_filter: false
+
+          notification_user_settings:
+            date_filter:
+              date_column: "created_at"
+              start_date: "2024-06-26"
+
+          payments_status:
+            date_filter: false
+
+          pools:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          report_constructor:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          skills:
+            date_filter:
+              date_column: "date_created"
+              start_date: "2024-06-26"
+
+          skills_to_user:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          skills_to_user_log:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          statistics:
+            date_filter: false
+
+          task_additional:
+            date_filter: false
+
+          task_status:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          team_tags:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          templates:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          upload_files:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          upload_files_config:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          upload_files_educations:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          upload_files_honeypots:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          upload_files_nu:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+
+          upload_files_rating:
+            date_filter: false
+
+          upload_files_recorders:
+            date_filter:
+              date_column: "date_add"
+              start_date: "2024-06-26"
+

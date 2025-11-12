@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-ch-replicator
+  namespace: default
+  labels:
+    app: mysql-ch-replicator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-ch-replicator
+  template:
+    metadata:
+      labels:
+        app: mysql-ch-replicator
+    spec:
+      containers:
+      - name: replicator
+        image: mysql-ch-replicator:latest  # Замените на ваш registry/image:tag
+        imagePullPolicy: IfNotPresent
+        command: ["mysql_ch_replicator", "--config", "/app/config.yaml", "run_all"]
+        volumeMounts:
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+          readOnly: true
+        - name: data
+          mountPath: /app/data
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - mysql_ch_replicator
+          initialDelaySeconds: 40
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - mysql_ch_replicator
+          initialDelaySeconds: 40
+          periodSeconds: 30
+          timeoutSeconds: 10
+      volumes:
+      - name: config
+        configMap:
+          name: replicator-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: replicator-data
+
