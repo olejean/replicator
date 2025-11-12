@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql-ch-replicator
-  namespace: default
+  namespace: elementary-analytics
   labels:
     app: mysql-ch-replicator
 spec:

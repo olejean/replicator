@@ -42,24 +42,36 @@ docker build -t mysql-ch-replicator:latest .
 - Настройте параметры MySQL
 - Проверьте StorageClass для PVC
 
-3. **Установите Helm chart:**
+3. **Создайте namespace (если еще не создан):**
 
 ```bash
-helm install replicator ./helm/replicator
+kubectl create namespace elementary-analytics
 ```
 
-4. **Проверьте статус:**
+4. **Установите Helm chart:**
 
 ```bash
-kubectl get pods -l app.kubernetes.io/name=replicator
-kubectl logs -l app.kubernetes.io/name=replicator
+helm install replicator ./helm/replicator -n elementary-analytics
+```
+
+5. **Проверьте статус:**
+
+```bash
+kubectl get pods -n elementary-analytics -l app.kubernetes.io/name=replicator
+kubectl logs -n elementary-analytics -l app.kubernetes.io/name=replicator
 ```
 
 ### Вариант 2: Использование Kubernetes манифестов
 
 1. **Соберите Docker образ** (см. выше)
 
-2. **Обновите configmap.yaml:**
+2. **Создайте namespace (если еще не создан):**
+
+```bash
+kubectl create namespace elementary-analytics
+```
+
+3. **Обновите configmap.yaml:**
 
 Измените host для ClickHouse на имя вашего Service:
 ```yaml
@@ -67,7 +79,7 @@ clickhouse:
   host: 'clickhouse'  # Имя Service ClickHouse
 ```
 
-3. **Примените манифесты:**
+4. **Примените манифесты:**
 
 ```bash
 kubectl apply -f k8s/configmap.yaml
@@ -79,10 +91,10 @@ kubectl apply -f k8s/deployment.yaml
 
 В Kubernetes репликатор подключается к ClickHouse через Service. Убедитесь, что:
 
-1. **ClickHouse Service существует:**
+1. **ClickHouse Service существует в том же namespace:**
 
 ```bash
-kubectl get svc | grep clickhouse
+kubectl get svc -n elementary-analytics | grep clickhouse
 ```
 
 2. **Имя Service указано в config.yaml:**
@@ -93,11 +105,13 @@ clickhouse:
   host: 'clickhouse'  # Имя Service, не IP!
 ```
 
+Если ClickHouse в другом namespace, используйте полное имя: `clickhouse.other-namespace.svc.cluster.local`
+
 3. **Проверьте доступность:**
 
 ```bash
 # Изнутри pod репликатора
-kubectl exec -it <replicator-pod> -- wget -O- http://clickhouse:8123/ping
+kubectl exec -it -n elementary-analytics <replicator-pod> -- wget -O- http://clickhouse:8123/ping
 ```
 
 ## Конфигурация
@@ -123,7 +137,7 @@ table_name:
 ### Логи
 
 ```bash
-kubectl logs -f deployment/mysql-ch-replicator
+kubectl logs -f -n elementary-analytics deployment/mysql-ch-replicator
 ```
 
 ### Healthcheck
@@ -136,17 +150,17 @@ kubectl logs -f deployment/mysql-ch-replicator
 
 1. Проверьте имя Service:
 ```bash
-kubectl get svc -A | grep clickhouse
+kubectl get svc -n elementary-analytics | grep clickhouse
 ```
 
 2. Проверьте DNS:
 ```bash
-kubectl exec -it <replicator-pod> -- nslookup clickhouse
+kubectl exec -it -n elementary-analytics <replicator-pod> -- nslookup clickhouse
 ```
 
 3. Проверьте сетевую доступность:
 ```bash
-kubectl exec -it <replicator-pod> -- wget -O- http://clickhouse:8123/ping
+kubectl exec -it -n elementary-analytics <replicator-pod> -- wget -O- http://clickhouse:8123/ping
 ```
 
 ### Проблемы с PVC
@@ -160,7 +174,7 @@ kubectl get storageclass
 
 3. Проверьте статус PVC:
 ```bash
-kubectl get pvc replicator-data
+kubectl get pvc -n elementary-analytics replicator-data
 ```
 
 ### Проблемы с MySQL
@@ -174,7 +188,7 @@ kubectl get pvc replicator-data
 ### Helm
 
 ```bash
-helm upgrade replicator ./helm/replicator
+helm upgrade replicator ./helm/replicator -n elementary-analytics
 ```
 
 ### Kubernetes манифесты
@@ -188,7 +202,7 @@ kubectl apply -f k8s/
 ### Helm
 
 ```bash
-helm uninstall replicator
+helm uninstall replicator -n elementary-analytics
 ```
 
 ### Kubernetes манифесты
@@ -199,5 +213,5 @@ kubectl delete -f k8s/
 
 **Внимание:** PVC не удаляется автоматически. Для удаления данных:
 ```bash
-kubectl delete pvc replicator-data
+kubectl delete pvc -n elementary-analytics replicator-data
 ```

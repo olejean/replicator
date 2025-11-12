@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: replicator-config
-  namespace: default
+  namespace: elementary-analytics
 data:
   config.yaml: |
     mysql:

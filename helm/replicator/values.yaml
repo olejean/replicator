@@ -61,5 +61,5 @@ healthcheck:
   failureThreshold: 3
 
 # Namespace
-namespace: default
+namespace: elementary-analytics
 

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: replicator-data
-  namespace: default
+  namespace: elementary-analytics
 spec:
   accessModes:
     - ReadWriteOnce
